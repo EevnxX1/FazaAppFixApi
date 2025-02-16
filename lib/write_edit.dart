@@ -10,32 +10,76 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 import 'dart:html' as html;
+import 'package:http/http.dart' as http;
 
-class write3Page extends StatefulWidget {
-  const write3Page({super.key});
+class WriteEdit extends StatefulWidget {
+  final int id_buku;
+  final int id_user;
+  final String genre;
+  final String judul_buku;
+  final String sinopsis;
+  final String cover_book;
+
+  const WriteEdit({
+    super.key,
+    required this.id_buku,
+    required this.id_user,
+    required this.genre,
+    required this.judul_buku,
+    required this.sinopsis,
+    required this.cover_book,
+  });
 
   @override
-  State<write3Page> createState() => _write3PageState();
+  State<WriteEdit> createState() => _WriteEditState();
 }
 
-class _write3PageState extends State<write3Page> {
-  // bjek yang digunakan untuk menyimpan dan mengelola status nilai yang dipilih pada dropdown.
-  final ValueNotifier<String?> _selectedValueNotifier = ValueNotifier<String?>(null);
-
-  @override
-  void dispose() {
-    _selectedValueNotifier.dispose(); // Dispose the ValueNotifier when no longer needed
-    super.dispose();
-  }
-
-  // Mengontrol input teks pada form tambah data cerita (genre, judul, sinopsis, cover_book).
-  final TextEditingController _judulController = TextEditingController();
-  final TextEditingController _sinopsisController = TextEditingController();
-  // isLoading: Boolean untuk menampilkan indikator loading saat registrasi.
+class _WriteEditState extends State<WriteEdit> {
+  // menyiapkan variabel
+  late TextEditingController _judulController;
+  late TextEditingController _sinopsisController;
+  late ValueNotifier<String?> _selectedValueNotifier;
+  Uint8List? _coverBytes;
   bool _isLoading = false;
 
-  // variabel untuk menyimpan file gambar yang dipilih oleh pengguna
-  Uint8List? _coverBytes;
+
+  @override
+  // Pada saat mulai menampilkan halaman, hal pertama yang dilakukan adalah memasukkan value input dari database.
+  void initState() {
+    super.initState();
+    _judulController = TextEditingController(text: widget.judul_buku);
+    _sinopsisController = TextEditingController(text: widget.sinopsis);
+    _selectedValueNotifier = ValueNotifier<String?>(widget.genre);
+    fetchImage();
+    print(widget.cover_book);
+    print(_coverBytes);
+  }
+
+  // fungsi untuk menetapkan gambar yang lama atau tidak ganti gambar
+  Future<void> fetchImage() async {
+    String imageUrl = widget.cover_book;
+    try { 
+      final response = await http.get(Uri.parse(imageUrl));
+      if (response.statusCode == 200) {
+        setState(() {
+          _coverBytes = response.bodyBytes;
+        });
+      } else {
+        print("Gagal mengambil gambar: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  @override
+  // pada saat mulai meninggalkan widget, fungsi ini akan aktif dan menghapus isi input
+  void dispose() {
+    _judulController.dispose();
+    _sinopsisController.dispose();
+    _selectedValueNotifier.dispose();
+    super.dispose();
+  }
 
   // Fungsi _pickImage digunakan untuk mengambil gambar dari galeri.
   void _pickImage() {
@@ -43,6 +87,7 @@ class _write3PageState extends State<write3Page> {
   uploadInput.accept = 'image/*';
   uploadInput.click();
 
+  // Menampilkan gambar pada saat selesai memilih gambar
   uploadInput.onChange.listen((event) {
     final files = uploadInput.files;
     if (files!.isNotEmpty) {
@@ -59,45 +104,45 @@ class _write3PageState extends State<write3Page> {
   });
   }
 
-  // masuk Ke Fungsi Register
-  void _kirimData() async {
-    // setState(): Digunakan untuk memperbarui state widget, seperti mengganti nilai
+  // masuk ke fungsi update data
+  void _updateData() async {
     setState(() {
       _isLoading = true;
     });
 
-    // try-catch-finally:
-    // * Jika Registerasi berhasil, hasilnya diproses (contoh: ditampilkan dengan print()).
+    print(_coverBytes);
+    print(_selectedValueNotifier.value);
+    print(_judulController.text);
+    print(_sinopsisController.text);
+
+    // jika true maka dia akan mengupdate data dan mengoper halaman ke write1Page
     try {
-      // ApiService().register(): Memanggil fungsi register dari api_service.dart.
-      final apiService = ApiService(); //dari class di halaman api_service
-      final result = await apiService.addCerita(
-        _selectedValueNotifier.value ?? 'Belum di pilih', 
-        _judulController.text, 
-        _sinopsisController.text, 
+      final apiService = ApiService();
+      final result = await apiService.updateCerita(
+        widget.id_buku,
+        _selectedValueNotifier.value ?? widget.genre,
+        _judulController.text,
+        _sinopsisController.text,
         _coverBytes,
-        );
-      
-      // Handle successful Register (e.g., navigate to home screen)
-      Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => write1Page()),
       );
 
-      print(result);  // Or save the token, etc.
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => write1Page()),
+      );
 
-    // * Jika gagal, pesan error dicetak.
+      print(result);
+
+    // jika false maka dia akan mengeluarkan pesan false
     } catch (e) {
-      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(e.toString()),
-        backgroundColor: Colors.red, // Warna merah untuk error
-        duration: Duration(seconds: 3),
-      ),
-    );
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
       print(e);
-    // * Bagian finally memastikan bahwa indikator loading dimatikan setelah proses login selesai.
     } finally {
       setState(() {
         _isLoading = false;
@@ -124,7 +169,7 @@ class _write3PageState extends State<write3Page> {
           ),
         ),
         title: Text(
-          'Buat Cerita',
+          'Edit Cerita',
           style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: 20
@@ -140,6 +185,7 @@ class _write3PageState extends State<write3Page> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
+                  // input image
                     margin: EdgeInsets.only(top: 15, bottom: 18),
                     child: GestureDetector(
                       onTap: _pickImage,
@@ -153,9 +199,10 @@ class _write3PageState extends State<write3Page> {
                               border: Border.all(color: Colors.grey),
                               borderRadius: BorderRadius.circular(10),
                             ),
+                            // jika _coverBytes ada isinya(tidak null), maka munculkan gambar yang user input.
                             child: _coverBytes == null
-                              ? Icon(Icons.add_a_photo, size: 50)
-                              : Image.memory(_coverBytes!, fit: BoxFit.cover),
+                              ? Image.network('${widget.cover_book}', fit: BoxFit.cover,) //true
+                              : Image.memory(_coverBytes!, fit: BoxFit.cover), //false
                           ),
                           Text(
                             'Upload Cover Book',
@@ -227,6 +274,8 @@ class _write3PageState extends State<write3Page> {
                         ),
                         child: DropdownWidget(selectedValueNotifier: _selectedValueNotifier),
                       ),
+                      // ValueListenableBuilder digunakan untuk mendengarkan perubahan nilai dropdown.
+                      // Jika pengguna memilih opsi baru, teks akan diperbarui secara otomatis.
                       ValueListenableBuilder<String?>(
                         valueListenable: _selectedValueNotifier,
                         builder: (context, selectedValue, child) {
@@ -289,7 +338,7 @@ class _write3PageState extends State<write3Page> {
                       Container(
                         margin: EdgeInsets.only(bottom: 10),
                         child: InkWell(
-                          onTap: _kirimData,
+                          onTap: _updateData,
                           child: Container(
                             width: screenWidht,
                             padding: EdgeInsets.symmetric(horizontal: 25, vertical: 14),
@@ -299,7 +348,7 @@ class _write3PageState extends State<write3Page> {
                             ),
                             child: Text(
                               // Jika _isLoading == true, menampilkan Prosess...
-                              _isLoading ? 'Prosess..':'Tambahkan Cerita',
+                              _isLoading ? 'Prosess..':'Ubah Cerita',
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold

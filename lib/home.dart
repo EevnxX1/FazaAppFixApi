@@ -1,10 +1,9 @@
+import 'package:faza_citra/proper/appbar_user.dart';
+import 'package:faza_citra/proper/content_home.dart';
 import 'package:faza_citra/proper/navbar_user.dart';
 import 'package:flutter/material.dart';
 import './profile.dart';
-import './search1.dart';
-import './search2.dart';
-import './write1.dart';
-import './detail.dart';
+import 'services/preference_service.dart';
 class homePage extends StatefulWidget {
   const homePage({super.key});
 
@@ -17,35 +16,9 @@ class _homePageState extends State<homePage> {
   Widget build(BuildContext context) {
     final colorApp = Color.fromRGBO(214, 183, 255, 1.0);
     final screenWidht = MediaQuery.of(context).size.width; //dari layar
-    final screenHeight = MediaQuery.of(context).size.height; //dari layar
+    // final screenHeight = MediaQuery.of(context).size.height; //dari layar
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: colorApp,
-        leadingWidth: 150,
-        leading: Image.asset('assets/logo2.png'),
-        actions: [
-          InkWell(
-            onTap: () {
-              
-            },
-            child: Image.asset('assets/Sliders.png'),
-          ),
-          Container(
-            margin: EdgeInsets.only(right: 20, left: 20),
-            child: InkWell(
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return profilePage();
-                  }
-                ),
-                );
-            },
-            child: Image.asset('assets/iconProfile.png'),
-          ),
-          )
-        ],
-      ),
+      appBar: AppbarUser(),
       body: SingleChildScrollView(
         child: Container(
         child: Column(
@@ -60,7 +33,7 @@ class _homePageState extends State<homePage> {
                     child: Text(
                       'My Books',
                       style: TextStyle(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 20
                       ),
                     ),
@@ -71,153 +44,12 @@ class _homePageState extends State<homePage> {
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 15),
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) {
-                                  return detailPage();
-                                }
-                              ),
-                              );
-                            },
-                            child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Image.asset(
-                                'assets/wavesB.png',
-                                scale: 0.8,
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 8),
-                                height: 50,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      child: Text(
-                                        'Waves',
-                                        style: TextStyle(
-                                          fontSize: 19,
-                                          fontWeight: FontWeight.w800
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      child: Text(
-                                        'Ingrid Chardbert',
-                                        style: TextStyle(
-                                          color: Colors.black38
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
-                          )
-                        ),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 15),
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) {
-                                  return detailPage();
-                                }
-                              ),
-                              );
-                            },
-                            child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Image.asset(
-                                'assets/ayntB.png',
-                                scale: 0.8,
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 8),
-                                height: 50,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      child: Text(
-                                        'Are You Nobody..',
-                                        style: TextStyle(
-                                          fontSize: 19,
-                                          fontWeight: FontWeight.w800
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      child: Text(
-                                        'Tina Cane',
-                                        style: TextStyle(
-                                          color: Colors.black38
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
-                          )
-                        ),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 15),
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) {
-                                  return detailPage();
-                                }
-                              ),
-                              );
-                            },
-                            child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Image.asset(
-                                'assets/dgB.png',
-                                scale: 0.8,
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 8),
-                                height: 50,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      child: Text(
-                                        'Deliver Girl',
-                                        style: TextStyle(
-                                          fontSize: 19,
-                                          fontWeight: FontWeight.w800
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      child: Text(
-                                        'Sophie Rowe',
-                                        style: TextStyle(
-                                          color: Colors.black38
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
-                          )
-                        ),
+                        myBooks(
+                          content: 'konten', 
+                          gambar: 'assets/wavesB.png', 
+                          judul: 'Waves', 
+                          penulis: 'Ingrid Chardbert'
+                        )
                       ],
                     )
                   )
@@ -234,7 +66,7 @@ class _homePageState extends State<homePage> {
                       'New Story',
                       style: TextStyle(
                         fontSize: 20,
-                        fontWeight: FontWeight.w800
+                        fontWeight: FontWeight.w700
                       ),
                     ),
                   ),
@@ -255,19 +87,21 @@ class _homePageState extends State<homePage> {
                             children: [
                               Container(
                                 margin: EdgeInsets.only(bottom: 5),
-                                width: 90,
+                                // width: 100,
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Icon(
+                                    Container(
+                                      margin: EdgeInsets.only(right: 10),
+                                      child: Icon(
                                       Icons.sort,
                                       size: 30,
+                                    ),
                                     ),
                                     Text(
                                       '15 Bab',
                                       style: TextStyle(
                                         fontSize: 18,
-                                        fontWeight: FontWeight.w900
+                                        fontWeight: FontWeight.w700
                                       ),
                                     )
                                   ],
@@ -279,7 +113,7 @@ class _homePageState extends State<homePage> {
                                   'The First Move',
                                   style: TextStyle(
                                     fontSize: 18,
-                                    fontWeight: FontWeight.w900
+                                    fontWeight: FontWeight.w700
                                   ),
                                 ),
                               ),
@@ -336,7 +170,7 @@ class _homePageState extends State<homePage> {
                     child: Text(
                       'Continue Reading',
                       style: TextStyle(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 20
                       ),
                     ),
@@ -368,7 +202,7 @@ class _homePageState extends State<homePage> {
                                         'I Went To See..',
                                         style: TextStyle(
                                           fontSize: 19,
-                                          fontWeight: FontWeight.w800
+                                          fontWeight: FontWeight.w700
                                         ),
                                       ),
                                     ),
@@ -407,7 +241,7 @@ class _homePageState extends State<homePage> {
                                         'Something Is..',
                                         style: TextStyle(
                                           fontSize: 19,
-                                          fontWeight: FontWeight.w800
+                                          fontWeight: FontWeight.w700
                                         ),
                                       ),
                                     ),
@@ -446,7 +280,7 @@ class _homePageState extends State<homePage> {
                                         'Catboy ',
                                         style: TextStyle(
                                           fontSize: 19,
-                                          fontWeight: FontWeight.w800
+                                          fontWeight: FontWeight.w700
                                         ),
                                       ),
                                     ),

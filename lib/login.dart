@@ -1,8 +1,13 @@
- import 'package:flutter/material.dart';
+ import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart';
  import './home.dart';
  import './admin/home.dart';
  // Mengimpor file eksternal yang berisi class ApiService yang sudah dijelaskan sebelumnya untuk menangani API.
  import 'services/api_service.dart';
+ import 'package:shared_preferences/shared_preferences.dart';
+ import 'services/preference_service.dart';
 
 class loginPage extends StatefulWidget {
   const loginPage({super.key});
@@ -14,6 +19,7 @@ class loginPage extends StatefulWidget {
 class _loginPageState extends State<loginPage> {
   bool _isObscured = true;
 
+  final PreferencesService preferencesService = PreferencesService();
   // _emailController & _passwordController: Controller yang digunakan untuk membaca input teks dari widget TextField.
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -34,6 +40,9 @@ class _loginPageState extends State<loginPage> {
       final apiService = ApiService(); //dari class di halaman api_service
       final result = await apiService.login(_emailController.text, _passwordController.text);
       
+      // Jika login berhasil, simpan data ke SharedPreferences
+      await preferencesService.saveUserData(result);
+
       // Handle successful login (e.g., navigate to home screen)
       Navigator.pushReplacement(
       context,
@@ -60,6 +69,8 @@ class _loginPageState extends State<loginPage> {
       });
     }
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +111,7 @@ class _loginPageState extends State<loginPage> {
                     style: TextStyle(
                       color: Colors.purple.shade300,
                       fontSize: 30,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   Container(
@@ -114,8 +125,8 @@ class _loginPageState extends State<loginPage> {
                         filled: true,
                         fillColor: Colors.white,
                         contentPadding: EdgeInsets.symmetric(horizontal: 35, vertical: 18),
-                        labelText: 'Username',
-                        hintText: 'Enter Your Username or Email Here',
+                        labelText: 'Email',
+                        hintText: 'Enter Your Email Here',
                         hintStyle: TextStyle(
                           fontSize: 15,
                           color: Colors.black.withOpacity(0.5),
@@ -208,7 +219,7 @@ class _loginPageState extends State<loginPage> {
                       'Forgot Password?',
                       style: TextStyle(
                         color: Colors.purple.shade300,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                         fontSize: 16
                       ),
                     ),
@@ -231,7 +242,7 @@ class _loginPageState extends State<loginPage> {
                         _isLoading ? 'Prosess..':'Sign In',
                         style: TextStyle(
                           fontSize: 15,
-                          fontWeight: FontWeight.w900
+                          fontWeight: FontWeight.w700
                         ),
                       ),
                     ),

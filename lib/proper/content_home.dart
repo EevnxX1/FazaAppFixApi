@@ -1,3 +1,4 @@
+import 'package:faza_citra/detail.dart';
 import 'package:flutter/material.dart';
 
 class myBooks extends StatelessWidget {
@@ -10,7 +11,7 @@ class myBooks extends StatelessWidget {
       required this.penulis
     });
 
-  final String content;
+  final String content; //content sesuai book id
   final String gambar;
   final String judul;
   final String penulis;
@@ -31,7 +32,8 @@ class myBooks extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Image.asset(
-                                'assets/wavesB.png',
+                                this.gambar,
+                                //'assets/wavesB.png',
                                 scale: 0.8,
                               ),
                               Container(
@@ -43,16 +45,18 @@ class myBooks extends StatelessWidget {
                                   children: [
                                     Container(
                                       child: Text(
-                                        'Waves',
+                                        this.judul,
+                                        // 'Waves',
                                         style: TextStyle(
                                           fontSize: 19,
-                                          fontWeight: FontWeight.w800
+                                          fontWeight: FontWeight.w700
                                         ),
                                       ),
                                     ),
                                     Container(
                                       child: Text(
-                                        'Ingrid Chardbert',
+                                        this.penulis,
+                                        // 'Ingrid Chardbert',
                                         style: TextStyle(
                                           color: Colors.black38
                                         ),

@@ -38,6 +38,7 @@ class welcomePage extends StatelessWidget {
                           'Welcome To ',
                           style: TextStyle(
                             fontSize: 27,
+                            fontWeight: FontWeight.w400
                           ),
                         ),
                         Text(
@@ -79,8 +80,8 @@ class welcomePage extends StatelessWidget {
                       child: Text(
                         'Sign In',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 16
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
                         ),
                       ),
                       style: TextButton.styleFrom(
@@ -109,7 +110,7 @@ class welcomePage extends StatelessWidget {
                             'Sign Up',
                             style: TextStyle(
                               color: Colors.purple.shade200,
-                              fontWeight: FontWeight.w900
+                              fontWeight: FontWeight.w700
                             ),
                           ),
                         )

@@ -1,81 +1,48 @@
-import 'package:faza_citra/proper/dropdown.dart';
+import 'package:faza_citra/proper/navbar_user.dart';
+import 'package:faza_citra/services/api_service.dart';
+import 'package:faza_citra/write1.dart';
 import 'package:flutter/material.dart';
-import './home.dart';
-import './search2.dart';
-import './write1.dart';
-import 'services/api_service.dart';
-// digunakan untuk mengelola file dalam sistem operasi, seperti mengambil gambar dari penyimpanan
-import 'dart:io';
-// Library untuk mengambil gambar dari kamera atau galeri
-import 'package:image_picker/image_picker.dart';
-import 'dart:typed_data';
-import 'dart:html' as html;
 
-class write3Page extends StatefulWidget {
-  const write3Page({super.key});
+class tambahBabPage extends StatefulWidget {
+  const tambahBabPage({
+    super.key,
+    required this.id_buku,
+    required this.judul_buku,
+    required this.cover_buku,
+  });
+
+  final id_buku;
+  final judul_buku;
+  final cover_buku;
 
   @override
-  State<write3Page> createState() => _write3PageState();
+  State<tambahBabPage> createState() => _tambahBabPageState();
 }
 
-class _write3PageState extends State<write3Page> {
-  // bjek yang digunakan untuk menyimpan dan mengelola status nilai yang dipilih pada dropdown.
-  final ValueNotifier<String?> _selectedValueNotifier = ValueNotifier<String?>(null);
+class _tambahBabPageState extends State<tambahBabPage> {
+  final TextEditingController _babNumberController = TextEditingController();
+  final TextEditingController _subJudulController = TextEditingController();
+  final TextEditingController _isiCeritaController = TextEditingController();
 
-  @override
-  void dispose() {
-    _selectedValueNotifier.dispose(); // Dispose the ValueNotifier when no longer needed
-    super.dispose();
-  }
-
-  // Mengontrol input teks pada form tambah data cerita (genre, judul, sinopsis, cover_book).
-  final TextEditingController _judulController = TextEditingController();
-  final TextEditingController _sinopsisController = TextEditingController();
-  // isLoading: Boolean untuk menampilkan indikator loading saat registrasi.
   bool _isLoading = false;
 
-  // variabel untuk menyimpan file gambar yang dipilih oleh pengguna
-  Uint8List? _coverBytes;
-
-  // Fungsi _pickImage digunakan untuk mengambil gambar dari galeri.
-  void _pickImage() {
-  html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-  uploadInput.accept = 'image/*';
-  uploadInput.click();
-
-  uploadInput.onChange.listen((event) {
-    final files = uploadInput.files;
-    if (files!.isNotEmpty) {
-      final file = files[0];
-      final reader = html.FileReader();
-      
-      reader.readAsArrayBuffer(file);
-      reader.onLoadEnd.listen((event) {
-        setState(() {
-          _coverBytes = reader.result as Uint8List;
-        });
-      });
-    }
-  });
-  }
-
   // masuk Ke Fungsi Register
-  void _kirimData() async {
+  void _babBaru() async {
     // setState(): Digunakan untuk memperbarui state widget, seperti mengganti nilai
     setState(() {
       _isLoading = true;
     });
-
+    // print(_babNumberController.text + _subJudulController.text + _isiCeritaController.text + widget.id_buku);
     // try-catch-finally:
     // * Jika Registerasi berhasil, hasilnya diproses (contoh: ditampilkan dengan print()).
     try {
       // ApiService().register(): Memanggil fungsi register dari api_service.dart.
       final apiService = ApiService(); //dari class di halaman api_service
-      final result = await apiService.addCerita(
-        _selectedValueNotifier.value ?? 'Belum di pilih', 
-        _judulController.text, 
-        _sinopsisController.text, 
-        _coverBytes,
+      final result = await apiService.buatBab(
+        _babNumberController.text, 
+        _subJudulController.text, 
+        _isiCeritaController.text, 
+        widget.id_buku.toString()
         );
       
       // Handle successful Register (e.g., navigate to home screen)
@@ -104,7 +71,6 @@ class _write3PageState extends State<write3Page> {
       });
     }
   }
-  
   @override
   Widget build(BuildContext context) {
     final colorApp = Color.fromRGBO(214, 183, 255, 1.0);
@@ -124,7 +90,7 @@ class _write3PageState extends State<write3Page> {
           ),
         ),
         title: Text(
-          'Buat Cerita',
+          '${widget.judul_buku}',
           style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: 20
@@ -140,30 +106,35 @@ class _write3PageState extends State<write3Page> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                    margin: EdgeInsets.only(top: 15, bottom: 18),
-                    child: GestureDetector(
-                      onTap: _pickImage,
-                      child: Column(
-                        children: [
-                          Container(
-                            margin: EdgeInsets.only(bottom: 5),
-                            height: 200,
-                            width: 150,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: _coverBytes == null
-                              ? Icon(Icons.add_a_photo, size: 50)
-                              : Image.memory(_coverBytes!, fit: BoxFit.cover),
-                          ),
-                          Text(
-                            'Upload Cover Book',
-                          )
-                        ],
+                  padding: EdgeInsets.all(10),
+                  height: 220,
+                  width: 150,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(
+                        'assets/wilB.png',
                       )
+                    )
+                    ),
+                  child: Container(
+                    alignment: Alignment.topRight,
+                    child: InkWell(
+                    onTap: () {
+                      
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.grey.withOpacity(0.9)
+                      ),
+                      child: Icon(
+                        Icons.edit_outlined
+                      ),
                     ),
                   ),
+                  )
+                ),
                 Container(
                   margin: EdgeInsets.only(top: 20),
                   child: Column(
@@ -172,7 +143,7 @@ class _write3PageState extends State<write3Page> {
                       Container(
                         margin: EdgeInsets.only(left: 15, bottom: 5),
                         child: Text(
-                        'Judul Cerita',
+                        'Bab Number',
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 16
@@ -185,17 +156,20 @@ class _write3PageState extends State<write3Page> {
                           color: Colors.black.withOpacity(0.09)
                         ),
                         child: TextField(
-                          controller: _judulController,
-                          maxLines: null,
+                          controller: _babNumberController,
                           style: TextStyle(
                             fontWeight: FontWeight.w900
                           ),
                           decoration: InputDecoration(
-                            hintText: 'Tambahkan Judul Cerita',
                             contentPadding: EdgeInsets.only(top: 12, left: 20, bottom: 12),
                             border: InputBorder.none,
-                            suffixIcon: Icon(
-                              Icons.post_add_outlined
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                
+                              },
+                              icon: Icon(
+                                Icons.edit_outlined
+                              ),
                             )
                           ),
                         ),
@@ -211,40 +185,7 @@ class _write3PageState extends State<write3Page> {
                       Container(
                         margin: EdgeInsets.only(left: 15, bottom: 5),
                         child: Text(
-                        'Genre',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 16
-                        ),
-                      ),
-                      ),
-                      Container(
-                        width: screenWidht,
-                        padding: EdgeInsets.symmetric(horizontal: 25),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.black.withOpacity(0.09)
-                        ),
-                        child: DropdownWidget(selectedValueNotifier: _selectedValueNotifier),
-                      ),
-                      ValueListenableBuilder<String?>(
-                        valueListenable: _selectedValueNotifier,
-                        builder: (context, selectedValue, child) {
-                          return Text('Opsi yang dipilih: $selectedValue');
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(top: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(left: 15, bottom: 5),
-                        child: Text(
-                        'Sinopsis',
+                        'Sub Judul',
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 16
@@ -257,18 +198,64 @@ class _write3PageState extends State<write3Page> {
                           color: Colors.black.withOpacity(0.09)
                         ),
                         child: TextField(
-                          controller: _sinopsisController,
+                          controller: _subJudulController,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900
+                          ),
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.only(top: 12, left: 20, bottom: 12),
+                            border: InputBorder.none,
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                
+                              },
+                              icon: Icon(
+                                Icons.edit_outlined
+                              ),
+                            )
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(left: 15, bottom: 5),
+                        child: Text(
+                        'Isi Cerita',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16
+                        ),
+                      ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.black.withOpacity(0.09)
+                        ),
+                        child: TextField(
+                          controller: _isiCeritaController,
                           maxLines: null,
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.black
+                            color: Colors.black.withOpacity(0.5)
                           ),
                           decoration: InputDecoration(
-                            hintText: 'Tambahkan Sinopsis',
                             contentPadding: EdgeInsets.only(top: 15, left: 20, bottom: 15),
                             border: InputBorder.none,
-                            suffixIcon: Icon(
-                              Icons.post_add_outlined
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                
+                              },
+                              icon: Icon(
+                                Icons.edit_outlined
+                              ),
                             )
                           ),
                         ),
@@ -289,7 +276,7 @@ class _write3PageState extends State<write3Page> {
                       Container(
                         margin: EdgeInsets.only(bottom: 10),
                         child: InkWell(
-                          onTap: _kirimData,
+                          onTap: _babBaru,
                           child: Container(
                             width: screenWidht,
                             padding: EdgeInsets.symmetric(horizontal: 25, vertical: 14),
@@ -298,8 +285,7 @@ class _write3PageState extends State<write3Page> {
                               color: Colors.black.withOpacity(0.09)
                             ),
                             child: Text(
-                              // Jika _isLoading == true, menampilkan Prosess...
-                              _isLoading ? 'Prosess..':'Tambahkan Cerita',
+                              _isLoading ? 'Prosess..':'Tambah Bab',
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold
@@ -316,69 +302,7 @@ class _write3PageState extends State<write3Page> {
             ),
           ),
         ),
-        bottomNavigationBar: Container(
-        height: 70,
-        width: screenWidht,
-        decoration: BoxDecoration(
-          color: colorApp
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            IconButton(
-              icon: Icon(
-                Icons.home_outlined,
-                size: 28,
-              ),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return homePage();
-                  }
-                ),
-                );
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.search,
-                size: 28,
-              ),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return search2Page();
-                  }
-                ),
-                );
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.stacked_bar_chart,
-                size: 28,
-              ),
-              onPressed: () {
-                
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.edit,
-                size: 28,
-              ),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return write1Page();
-                  }
-                ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+        bottomNavigationBar: navbarUser()
     );
   }
 }

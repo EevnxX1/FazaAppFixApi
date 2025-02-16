@@ -1,3 +1,4 @@
+import 'package:faza_citra/proper/navbar_user.dart';
 import 'package:flutter/material.dart';
 import './home.dart';
 import './search2.dart';
@@ -65,12 +66,11 @@ class _profilePageState extends State<profilePage> {
                 ),
               ),
               Container(
-                margin: EdgeInsets.only(top: 20),
-                height: 140,
+                margin: EdgeInsets.only(top: 15),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
+                      margin: EdgeInsets.only(bottom: 11),
                       child: Column(
                         children: [
                           Container(
@@ -82,15 +82,11 @@ class _profilePageState extends State<profilePage> {
                               ),
                             ),
                           ),
-                          Container(
-                            child: Text(
-                              'Gladis Clarissa Yang'
-                            ),
-                          )
                         ],
                       ),
                     ),
                     Container(
+                      margin: EdgeInsets.only(bottom: 11),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -139,7 +135,7 @@ class _profilePageState extends State<profilePage> {
                       ),
                     ),
                     Container(
-                      width: 120,
+                      width: 160,
                       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                       decoration: BoxDecoration(
                         color: colorApp,
@@ -382,69 +378,7 @@ class _profilePageState extends State<profilePage> {
           ),
         ),
        ),
-       bottomNavigationBar: Container(
-        height: 70,
-        width: screenWidht,
-        decoration: BoxDecoration(
-          color: colorApp
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            IconButton(
-              icon: Icon(
-                Icons.home_outlined,
-                size: 28,
-              ),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return homePage();
-                  }
-                ),
-                );
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.search,
-                size: 28,
-              ),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return search2Page();
-                  }
-                ),
-                );
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.stacked_bar_chart,
-                size: 28,
-              ),
-              onPressed: () {
-                
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.edit,
-                size: 28,
-              ),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return write1Page();
-                  }
-                ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+       bottomNavigationBar: navbarUser()
     );
   }
 }

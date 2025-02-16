@@ -1,16 +1,50 @@
+import 'package:faza_citra/proper/navbar_user.dart';
+import 'package:faza_citra/read.dart';
+import 'package:faza_citra/tambah_bab.dart';
 import 'package:flutter/material.dart';
-import './home.dart';
-import './search2.dart';
-import './write1.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class write2Page extends StatefulWidget {
-  const write2Page({super.key});
+class write2Page extends StatelessWidget {
+  const write2Page(
+    {
+      super.key,
+      required this.id_buku,
+      required this.id_user,
+      required this.genre,
+      required this.judul_buku,
+      required this.sinopsis,
+      required this.cover_book,
+    }
+  );
+  final id_buku;
+  final id_user;
+  final genre;
+  final judul_buku;
+  final sinopsis;
+  final cover_book;
 
-  @override
-  State<write2Page> createState() => _write2PageState();
-}
+  Future<List<Map<String, dynamic>>> fetchBabList() async {
+    final url = Uri.parse('http://127.0.0.1:8000/api/books/$id_buku/babs');
 
-class _write2PageState extends State<write2Page> {
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((bab) => {
+          'bab_number': bab['bab_number'],
+          'sub_title': bab['sub_title'],
+          'body': bab['body'],
+        }).toList();
+      } else {
+        throw Exception('Gagal mengambil data bab');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final colorApp = Color.fromRGBO(214, 183, 255, 1.0);
@@ -30,7 +64,7 @@ class _write2PageState extends State<write2Page> {
           ),
         ),
         title: Text(
-          'Where I Live',
+          this.judul_buku,
           style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: 20
@@ -97,7 +131,7 @@ class _write2PageState extends State<write2Page> {
                         ),
                         child: TextField(
                           controller: TextEditingController(
-                            text: 'Where I Live'
+                            text: this.judul_buku
                           ),
                           style: TextStyle(
                             fontWeight: FontWeight.w900
@@ -142,7 +176,7 @@ class _write2PageState extends State<write2Page> {
                         child: TextField(
                           maxLines: null,
                           controller: TextEditingController(
-                            text: """Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and ...""",
+                            text: this.sinopsis,
                           ),
                           style: TextStyle(
                             fontSize: 14,
@@ -178,7 +212,7 @@ class _write2PageState extends State<write2Page> {
                         child: TextField(
                           maxLines: null,
                           controller: TextEditingController(
-                            text: """Hak cipta di lindungi undang-undang"""
+                            text: this.genre,
                           ),
                           style: TextStyle(
                             color: Colors.black.withOpacity(0.5),
@@ -222,10 +256,42 @@ class _write2PageState extends State<write2Page> {
                         ),
                       ),
                       Container(
+                        width: screenWidht,
+                        height: screenHeight * 0.1,
+                        child: Expanded(
+                        child: FutureBuilder<List<Map<String, dynamic>>>(
+                          future: fetchBabList(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Center(child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Center(child: Text("Belum ada bab"));
+                            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                              return Center(child: Text("Belum ada bab"));
+                            }
+
+                            List<Map<String, dynamic>> babList = snapshot.data!;
+
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: babList.length,
+                              itemBuilder: (context, index) {
+                              final bab = babList[index];
+                              return Container(
                         margin: EdgeInsets.only(bottom: 10),
                         child: InkWell(
                           onTap: () {
-                            
+                            // Navigasi ke detail buku dengan mengirimkan ID buku
+                            Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => readPage(
+                                bab_number: bab['bab_number'],
+                                sub_judul: bab['sub_title'],
+                                isi_cerita: bab['body'],
+                              ),
+                            ),
+                            );
                           },
                           child: Container(
                             width: screenWidht,
@@ -235,7 +301,7 @@ class _write2PageState extends State<write2Page> {
                               color: Colors.black.withOpacity(0.09)
                             ),
                             child: Text(
-                              'Bab 1 : Found You',
+                              'Bab ${bab['bab_number']} : ${bab['sub_title']}',
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500
@@ -243,35 +309,28 @@ class _write2PageState extends State<write2Page> {
                             ),
                           )
                         ),
+                      );
+                  },
+                );
+              },
+            ),
+          ),
                       ),
                       Container(
                         margin: EdgeInsets.only(bottom: 10),
                         child: InkWell(
                           onTap: () {
-                            
-                          },
-                          child: Container(
-                            width: screenWidht,
-                            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 14),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.black.withOpacity(0.09)
-                            ),
-                            child: Text(
-                              'Bab 1 : Found You',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500
+                            // Navigasi ke detail buku dengan mengirimkan ID buku
+                            Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => tambahBabPage(
+                                id_buku: this.id_buku,
+                                judul_buku: this.judul_buku,
+                                cover_buku: this.cover_book,
                               ),
                             ),
-                          )
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(bottom: 10),
-                        child: InkWell(
-                          onTap: () {
-                            
+                            );
                           },
                           child: Container(
                             width: screenWidht,
@@ -281,56 +340,10 @@ class _write2PageState extends State<write2Page> {
                               color: Colors.black.withOpacity(0.09)
                             ),
                             child: Text(
-                              'Bab 1 : Found You',
+                              'Tambah Bab +',
                               style: TextStyle(
                                 fontSize: 15,
-                                fontWeight: FontWeight.w500
-                              ),
-                            ),
-                          )
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(bottom: 10),
-                        child: InkWell(
-                          onTap: () {
-                            
-                          },
-                          child: Container(
-                            width: screenWidht,
-                            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 14),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.black.withOpacity(0.09)
-                            ),
-                            child: Text(
-                              'Bab 1 : Found You',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500
-                              ),
-                            ),
-                          )
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(bottom: 10),
-                        child: InkWell(
-                          onTap: () {
-                            
-                          },
-                          child: Container(
-                            width: screenWidht,
-                            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 14),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.black.withOpacity(0.09)
-                            ),
-                            child: Text(
-                              'Bab 1 : Found You',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500
+                                fontWeight: FontWeight.bold
                               ),
                             ),
                           )
@@ -343,69 +356,7 @@ class _write2PageState extends State<write2Page> {
             ),
           ),
         ),
-        bottomNavigationBar: Container(
-        height: 70,
-        width: screenWidht,
-        decoration: BoxDecoration(
-          color: colorApp
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            IconButton(
-              icon: Icon(
-                Icons.home_outlined,
-                size: 28,
-              ),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return homePage();
-                  }
-                ),
-                );
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.search,
-                size: 28,
-              ),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return search2Page();
-                  }
-                ),
-                );
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.stacked_bar_chart,
-                size: 28,
-              ),
-              onPressed: () {
-                
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.edit,
-                size: 28,
-              ),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return write1Page();
-                  }
-                ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+        bottomNavigationBar: navbarUser()
     );
   }
 }

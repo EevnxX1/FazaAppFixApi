@@ -34,8 +34,8 @@ class _flashPageState extends State<flashPage> {
             image: AssetImage('assets/Pattern.png'),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
-              Colors.white.withOpacity(0.7),
-              BlendMode.srcATop
+              Colors.white.withOpacity(0.4),
+              BlendMode.dstATop
               )
           )
         ),

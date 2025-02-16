@@ -1,7 +1,12 @@
 import 'package:faza_citra/login.dart';
+import 'package:faza_citra/proper/form_regis.dart';
 import 'package:flutter/material.dart';
 // Mengimpor file eksternal yang berisi class ApiService yang sudah dijelaskan sebelumnya untuk menangani API.
 import 'services/api_service.dart';
+// digunakan untuk mengelola file dalam sistem operasi, seperti mengambil gambar dari penyimpanan
+// Library untuk mengambil gambar dari kamera atau galeri
+import 'dart:typed_data';
+import 'dart:html' as html;
 
 
 class RegisterPage extends StatefulWidget {
@@ -16,8 +21,34 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
   // isLoading: Boolean untuk menampilkan indikator loading saat registrasi.
   bool _isLoading = false;
+
+  // variabel untuk menyimpan file gambar yang dipilih oleh pengguna
+  Uint8List? _avatarBytes;
+
+  // Fungsi _pickImage digunakan untuk mengambil gambar dari galeri.
+  void _pickImage() {
+  html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+  uploadInput.accept = 'image/*';
+  uploadInput.click();
+
+  uploadInput.onChange.listen((event) {
+    final files = uploadInput.files;
+    if (files!.isNotEmpty) {
+      final file = files[0];
+      final reader = html.FileReader();
+      
+      reader.readAsArrayBuffer(file);
+      reader.onLoadEnd.listen((event) {
+        setState(() {
+          _avatarBytes = reader.result as Uint8List;
+        });
+      });
+    }
+  });
+  }
 
   // masuk Ke Fungsi Register
   void _register() async {
@@ -31,7 +62,13 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       // ApiService().register(): Memanggil fungsi register dari api_service.dart.
       final apiService = ApiService(); //dari class di halaman api_service
-      final result = await apiService.register(_usernameController.text, _emailController.text, _passwordController.text);
+      final result = await apiService.register(
+        _usernameController.text, 
+        _bioController.text, 
+        _emailController.text, 
+        _passwordController.text,
+        _avatarBytes,
+        );
       
       // Handle successful Register (e.g., navigate to home screen)
       Navigator.pushReplacement(
@@ -90,7 +127,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(top: 30),
+              margin: EdgeInsets.only(top: 15),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -99,137 +136,57 @@ class _RegisterPageState extends State<RegisterPage> {
                     style: TextStyle(
                       color: Colors.purple.shade300,
                       fontSize: 30,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   Container(
-                    margin: EdgeInsets.only(top: 25, bottom: 18),
-                    width: screenWidht * 0.8,
-                    child: TextField(
-                      // controller: Menghubungkan input dengan _usernameController
-                      controller: _usernameController,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 35, vertical: 18),
-                        labelText: 'Username',
-                        hintText: 'Ketikkan username Kamu',
-                        hintStyle: TextStyle(
-                          fontSize: 15,
-                          color: Colors.black.withOpacity(0.5),
-                          fontStyle: FontStyle.italic
-                        ),
-                        labelStyle: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.1
-                        ),
-                        floatingLabelStyle: TextStyle(
-                          fontSize: 20
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black.withOpacity(0.2),
-                            width: 1.5
+                    margin: EdgeInsets.only(top: 15, bottom: 18),
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: Column(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(bottom: 5),
+                            height: 150,
+                            width: 150,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: _avatarBytes == null
+                              ? Icon(Icons.add_a_photo, size: 50)
+                              : Image.memory(_avatarBytes!, fit: BoxFit.cover),
                           ),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.purple.shade200,
-                            width: 1.5
-                          ),
-                          borderRadius: BorderRadius.circular(15)
-                        )
-                      ),
+                          Text(
+                            'Upload Avatar',
+                          )
+                        ],
+                      )
                     ),
                   ),
-                  Container(
-                    width: screenWidht * 0.8,
+                  FormRegis(
                     margin: EdgeInsets.only(bottom: 18),
-                    child: TextField(
-                      // controller: Menghubungkan input dengan _emailController
-                      controller: _emailController,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 35, vertical: 18),
-                        labelText: 'Email',
-                        hintText: 'Enter Your Email Here',
-                        hintStyle: TextStyle(
-                          fontSize: 15,
-                          color: Colors.black.withOpacity(0.5),
-                          fontStyle: FontStyle.italic
-                        ),
-                        labelStyle: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.1
-                        ),
-                        floatingLabelStyle: TextStyle(
-                          fontSize: 20
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black.withOpacity(0.2),
-                            width: 1.5
-                          ),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.purple.shade200,
-                            width: 1.5
-                          ),
-                          borderRadius: BorderRadius.circular(15)
-                        )
-                      ),
-                    ),
+                    kontrol: _usernameController, 
+                    label: 'Username', 
+                    hint: 'Ketikkan Username Anda'
                   ),
-                  Container(
-                    width: screenWidht * 0.8,
+                  FormRegis(
                     margin: EdgeInsets.only(bottom: 18),
-                    child: TextField(
-                      // controller: Menghubungkan input dengan _passwordController
-                      controller: _passwordController,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 35, vertical: 18),
-                        labelText: 'Password',
-                        hintText: 'Enter Your Password Here',
-                        hintStyle: TextStyle(
-                          fontSize: 15,
-                          color: Colors.black.withOpacity(0.5),
-                          fontStyle: FontStyle.italic
-                        ),
-                        labelStyle: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.1
-                        ),
-                        floatingLabelStyle: TextStyle(
-                          fontSize: 20
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black.withOpacity(0.2),
-                            width: 1.5
-                          ),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.purple.shade200,
-                            width: 1.5
-                          ),
-                          borderRadius: BorderRadius.circular(15)
-                        )
-                      ),
-                    ),
+                    kontrol: _bioController, 
+                    label: 'Biografi', 
+                    hint: 'Ketikkan deskripsi diri tentang anda'
+                  ),
+                  FormRegis(
+                    margin: EdgeInsets.only(bottom: 18),
+                    kontrol: _emailController, 
+                    label: 'Email', 
+                    hint: 'Ketikkan Email Anda'
+                  ),
+                  FormRegis(
+                    margin: EdgeInsets.only(bottom: 18),
+                    kontrol: _passwordController, 
+                    label: 'Password', 
+                    hint: 'Ketikkan Password Anda'
                   ),
                   Container(
                     margin: EdgeInsets.only(bottom: 15),
@@ -275,7 +232,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         _isLoading ? 'Prosess..':'Sign Up',
                         style: TextStyle(
                           fontSize: 15,
-                          fontWeight: FontWeight.w900
+                          fontWeight: FontWeight.w700
                         ),
                       ),
                     ),
@@ -306,7 +263,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   Container(
                     width: screenWidht * 0.8,
-                    margin: EdgeInsets.only(bottom: 15),
+                    margin: EdgeInsets.only(bottom: 25),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[

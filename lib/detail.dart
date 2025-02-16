@@ -237,14 +237,14 @@ class _detailPageState extends State<detailPage> {
                     ),
                   ),
                   InkWell(
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) {
-                            return readPage();
-                          }
-                          ),
-                        );
-                    },
+                    // onTap: () {
+                    //   Navigator.of(context).push(MaterialPageRoute(
+                    //       builder: (context) {
+                    //         return readPage();
+                    //       }
+                    //       ),
+                    //     );
+                    // },
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.black.withOpacity(0.07),
@@ -263,12 +263,12 @@ class _detailPageState extends State<detailPage> {
                   ),
                   InkWell(
                     onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) {
-                            return readPage();
-                          }
-                          ),
-                        );
+                      // Navigator.of(context).push(MaterialPageRoute(
+                      //     builder: (context) {
+                      //       return readPage();
+                      //     }
+                      //     ),
+                      //   );
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -288,12 +288,12 @@ class _detailPageState extends State<detailPage> {
                   ),
                   InkWell(
                     onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) {
-                            return readPage();
-                          }
-                          ),
-                        );
+                      // Navigator.of(context).push(MaterialPageRoute(
+                      //     builder: (context) {
+                      //       return readPage();
+                      //     }
+                      //     ),
+                      //   );
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -313,12 +313,12 @@ class _detailPageState extends State<detailPage> {
                   ),
                   InkWell(
                     onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) {
-                            return readPage();
-                          }
-                          ),
-                        );
+                      // Navigator.of(context).push(MaterialPageRoute(
+                      //     builder: (context) {
+                      //       return readPage();
+                      //     }
+                      //     ),
+                      //   );
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -338,12 +338,12 @@ class _detailPageState extends State<detailPage> {
                   ),
                   InkWell(
                     onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) {
-                            return readPage();
-                          }
-                          ),
-                        );
+                      // Navigator.of(context).push(MaterialPageRoute(
+                      //     builder: (context) {
+                      //       return readPage();
+                      //     }
+                      //     ),
+                      //   );
                     },
                     child: Container(
                       decoration: BoxDecoration(

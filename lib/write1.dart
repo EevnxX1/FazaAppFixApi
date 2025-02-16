@@ -1,5 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:faza_citra/proper/appbar_user.dart';
 import 'package:faza_citra/proper/navbar_user.dart';
+import 'package:faza_citra/proper/view_books.dart';
 import 'package:flutter/material.dart';
+import 'services/api_service.dart';
 import './home.dart';
 import './profile.dart';
 import './search2.dart';
@@ -15,52 +19,56 @@ class write1Page extends StatefulWidget {
 }
 
 class _write1PageState extends State<write1Page> {
+  
+
   @override
   Widget build(BuildContext context) {
     final colorApp = Color.fromRGBO(214, 183, 255, 1.0);
     final screenWidht = MediaQuery.of(context).size.width; //dari layar
     final screenHeight = MediaQuery.of(context).size.height; //dari layar
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: colorApp,
-        leadingWidth: 150,
-        leading: Image.asset('assets/logo2.png'),
-        actions: [
-          InkWell(
-            onTap: () {
-              
-            },
-            child: Image.asset('assets/Sliders.png'),
-          ),
-          Container(
-            margin: EdgeInsets.only(right: 20, left: 20),
-            child: InkWell(
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return profilePage();
-                  }
-                ),
-                );
-            },
-            child: Image.asset('assets/iconProfile.png'),
-          ),
-          )
-        ],
-      ),
+      appBar: AppbarUser(),
       body: SingleChildScrollView(
         child: Container(
-          padding: EdgeInsets.only(top: 30, left: 15, right: 15),
+          padding: EdgeInsets.only(top: 20, left: 15, right: 15),
           child: Column(
             children: [
-              InkWell(
+              Container(
+                // height: screenHeight * 0.5,
+                child: FutureBuilder<List<Map<String, dynamic>>>(
+                future: ApiService().fetchUserBooks(), // Memanggil fungsi fetchUserBooks
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('Tidak ada buku untuk ditampilkan.'));
+                  } else {
+                    var books = snapshot.data!;
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: books.length,
+                      itemBuilder: (context, index) {
+                        var book = books[index];
+                        return Container(
+                margin: EdgeInsets.only(bottom: 10),
+                child: InkWell(
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) {
-                        return write2Page();
-                      }
+                  // Navigasi ke detail buku dengan mengirimkan ID buku
+                 Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => write2Page(
+                        id_buku: book['id'],
+                        id_user: book['user_id'],
+                        genre: book['status'],
+                        judul_buku: book['title'],
+                        sinopsis: book['sinopsis'],
+                        cover_book: book['cover_book'],
                     ),
-                    );
+                  ),
+                  );
                 },
                 child: Container(
                 padding: EdgeInsets.all(10),
@@ -69,9 +77,22 @@ class _write1PageState extends State<write1Page> {
                 ),
                 child: Row(
                   children: [
-                    Image.asset(
-                      'assets/tsbB.png'
-                    ),
+                    Image.network(
+  book['cover_book'],
+  width: 100,
+  height: 150,
+  fit: BoxFit.cover,
+  loadingBuilder: (context, child, loadingProgress) {
+    if (loadingProgress == null) {
+      return child;
+    } else {
+      return Center(child: CircularProgressIndicator());
+    }
+  },
+  errorBuilder: (context, error, stackTrace) {
+    return Center(child: Text('Gagal memuat gambar'));
+  },
+),
                     Container(
                       margin: EdgeInsets.only(left: 10),
                       child: Column(
@@ -90,7 +111,8 @@ class _write1PageState extends State<write1Page> {
                             margin: EdgeInsets.only(bottom: 4),
                             width: 230,
                             child: Text(
-                              "The Sky Blues : Touch Her is Possible",
+                              book['title'],
+                              // "The Sky Blues : Touch Her is Possible",
                               style: TextStyle(
                                 fontWeight: FontWeight.w800,
                                 fontSize: 15
@@ -126,6 +148,13 @@ class _write1PageState extends State<write1Page> {
                     )
                   ],
                 ),
+              ),
+              ),
+              );
+                      },
+                    );
+                  }
+                },
               ),
               ),
               Container(
