@@ -1,4 +1,5 @@
 import 'package:faza_citra/home.dart';
+import 'package:faza_citra/library.dart';
 import 'package:faza_citra/search2.dart';
 import 'package:faza_citra/write1.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +55,12 @@ class navbarUser extends StatelessWidget {
                 size: 28,
               ),
               onPressed: () {
-                
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) {
+                    return LibraryPage();
+                  }
+                ),
+                );
               },
             ),
             IconButton(

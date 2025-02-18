@@ -1,17 +1,55 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import './home.dart';
 import './read.dart';
 import './search2.dart';
 import './write1.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class detailPage extends StatefulWidget {
-  const detailPage({super.key});
+  final String id_buku;
+  final String cover_buku;
+  final String judul_buku;
+  final String nama_buat;
+  final String sinopsis;
+  const detailPage({
+    super.key,
+    required this.id_buku,
+    required this.cover_buku,
+    required this.judul_buku,
+    required this.nama_buat,
+    required this.sinopsis
+  });
 
   @override
   State<detailPage> createState() => _detailPageState();
 }
 
 class _detailPageState extends State<detailPage> {
+
+  Future<List<Map<String, dynamic>>> fetchBabList() async {
+    final url = Uri.parse('http://127.0.0.1:8000/api/books/${widget.id_buku}/babs');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((bab) => {
+          'id': bab['id'],
+          'book_id': bab['book_id'],
+          'bab_number': bab['bab_number'],
+          'sub_title': bab['sub_title'],
+          'body': bab['body'],
+        }).toList();
+      } else {
+        throw Exception('Gagal mengambil data bab');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidht = MediaQuery.of(context).size.width; //dari layar
@@ -33,7 +71,7 @@ class _detailPageState extends State<detailPage> {
         title: Text(
           'Baca Cerita',
           style: TextStyle(
-            fontWeight: FontWeight.w800
+            fontWeight: FontWeight.w700
           ),
         ),
         centerTitle: true,
@@ -50,18 +88,23 @@ class _detailPageState extends State<detailPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Image.asset(
-                    'assets/wilB.png',
+                  Container(
+                    width: 150,
+                    height: 220,
+                    child: CachedNetworkImage(
+                      imageUrl: widget.cover_buku,
+                      fit: BoxFit.fill,
+                    ),
                   ),
                   Text(
-                    'Where I Live',
+                    widget.judul_buku,
                     style: TextStyle(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       fontSize: 23
                     ),
                   ),
                   Text(
-                    'Brenda Rufener',
+                    widget.nama_buat,
                     style: TextStyle(
                       color: Colors.black54
                     ),
@@ -136,29 +179,29 @@ class _detailPageState extends State<detailPage> {
               margin: EdgeInsets.only(top: 10, bottom: 20),
               width: screenWidht,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    height: 45,
-                    padding: EdgeInsetsDirectional.symmetric(horizontal: 25),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.07),
-                      borderRadius: BorderRadius.circular(50)
-                    ),
-                    child: TextButton(
-                      onPressed: () {
+                  // Container(
+                  //   height: 45,
+                  //   padding: EdgeInsetsDirectional.symmetric(horizontal: 15),
+                  //   decoration: BoxDecoration(
+                  //     color: Colors.black.withOpacity(0.07),
+                  //     borderRadius: BorderRadius.circular(50)
+                  //   ),
+                  //   child: TextButton(
+                  //     onPressed: () {
                         
-                      },
-                      child: Text(
-                        'Baca Cerita Ini',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          color: Colors.black,
-                          fontSize: 14
-                        ),
-                      ),
-                    ),
-                  ),
+                  //     },
+                  //     child: Text(
+                  //       'Baca Cerita Ini',
+                  //       style: TextStyle(
+                  //         fontWeight: FontWeight.w700,
+                  //         color: Colors.black,
+                  //         fontSize: 13
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   Container(
                     height: 45,
                     padding: EdgeInsetsDirectional.symmetric(horizontal: 5),
@@ -173,9 +216,9 @@ class _detailPageState extends State<detailPage> {
                       child: Text(
                         'Tambah Ke Bacaan',
                         style: TextStyle(
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: Colors.black,
-                          fontSize: 14
+                          fontSize: 13
                         ),
                       ),
                     ),
@@ -184,34 +227,24 @@ class _detailPageState extends State<detailPage> {
               ),
             ),
             Container(
-              height: 162,
+              width: screenWidht,
                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  Container(
+                    margin: EdgeInsets.only(bottom: 15),
+                    child: Text(
                     'Sinopsis :',
                     style: TextStyle(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       fontSize: 18
                     ),
                   ),
+                  ),
                   Text(
-                    'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and ...',
+                    widget.sinopsis,
                     textAlign: TextAlign.justify,
                   ),
-                  InkWell(
-                    onTap: () {
-                      
-                    },
-                    child: Text(
-                      'Baca Selengkapnya...',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15
-                      ),
-                    ),
-                  )
                 ],
                ),
             ),
@@ -221,146 +254,87 @@ class _detailPageState extends State<detailPage> {
               height: 1,
             ),
             Container(
-              height: 300,
               margin: EdgeInsets.only(bottom: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
+                    margin: EdgeInsets.only(bottom: 12),
                     child: Text(
                       'Bab Cerita',
                       style: TextStyle(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 18
                       ),
                     ),
                   ),
-                  InkWell(
-                    // onTap: () {
-                    //   Navigator.of(context).push(MaterialPageRoute(
-                    //       builder: (context) {
-                    //         return readPage();
-                    //       }
-                    //       ),
-                    //     );
-                    // },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.07),
-                        borderRadius: BorderRadius.circular(5)
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                      width: screenWidht,
-                      child: Text(
-                        'Bab 1 : Found You',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500
+                  Container(
+                        width: screenWidht,
+                        child: FutureBuilder<List<Map<String, dynamic>>>(
+                          future: fetchBabList(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Center(child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Center(child: Text("Gagal Mengambil Bab Cerita", 
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500
+                              ),
+                              ));
+                            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                              return Center(child: Text("Belum ada Bab Cerita", 
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500
+                              ),
+                              ));
+                            }
+
+                            List<Map<String, dynamic>> babList = snapshot.data!;
+
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: babList.length,
+                              itemBuilder: (context, index) {
+                              final bab = babList[index];
+                              return Container(
+                        margin: EdgeInsets.only(bottom: 10),
+                        child: InkWell(
+                          onTap: () {
+                            // Navigasi ke detail buku dengan mengirimkan ID buku
+                            Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => readPage(
+                                bab_number: bab['bab_number'].toString(),
+                                sub_judul: bab['sub_title'],
+                                isi_cerita: bab['body'],
+                              ),
+                            ),
+                            );
+                          },
+                          child: Container(
+                            width: screenWidht,
+                            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 14),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Colors.black.withOpacity(0.09)
+                            ),
+                            child: Text(
+                              'Bab ${bab['bab_number']} : ${bab['sub_title']}',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700
+                              ),
+                            ),
+                          )
                         ),
+                      );
+                  },
+                );
+              },
+            ),
                       ),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      // Navigator.of(context).push(MaterialPageRoute(
-                      //     builder: (context) {
-                      //       return readPage();
-                      //     }
-                      //     ),
-                      //   );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.07),
-                        borderRadius: BorderRadius.circular(5)
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                      width: screenWidht,
-                      child: Text(
-                        'Bab 2 : Nice to meet you, Rin',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500
-                        ),
-                      ),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      // Navigator.of(context).push(MaterialPageRoute(
-                      //     builder: (context) {
-                      //       return readPage();
-                      //     }
-                      //     ),
-                      //   );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.07),
-                        borderRadius: BorderRadius.circular(5)
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                      width: screenWidht,
-                      child: Text(
-                        'Bab 3 : Once upon a time',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500
-                        ),
-                      ),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      // Navigator.of(context).push(MaterialPageRoute(
-                      //     builder: (context) {
-                      //       return readPage();
-                      //     }
-                      //     ),
-                      //   );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.07),
-                        borderRadius: BorderRadius.circular(5)
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                      width: screenWidht,
-                      child: Text(
-                        'Bab 4 : Nice to meet you, Ren',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500
-                        ),
-                      ),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      // Navigator.of(context).push(MaterialPageRoute(
-                      //     builder: (context) {
-                      //       return readPage();
-                      //     }
-                      //     ),
-                      //   );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.07),
-                        borderRadius: BorderRadius.circular(5)
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                      width: screenWidht,
-                      child: Text(
-                        'Bab 5 : Once upon a time',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500
-                        ),
-                      ),
-                    ),
-                  ),
+                  
                 ],
               ),
             )

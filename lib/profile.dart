@@ -1,4 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:faza_citra/proper/navbar_user.dart';
+import 'package:faza_citra/services/api_service.dart';
+import 'package:faza_citra/services/preference_service.dart';
+import 'package:faza_citra/welcome_page.dart';
 import 'package:flutter/material.dart';
 import './home.dart';
 import './search2.dart';
@@ -12,6 +16,52 @@ class profilePage extends StatefulWidget {
 }
 
 class _profilePageState extends State<profilePage> {
+
+
+  void confirmLogout(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return AlertDialog(
+        title: Text("Konfirmasi Logout"),
+        content: Text("Apakah Anda yakin ingin logout?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext); // Tutup dialog tanpa logout
+            },
+            child: Text("Batal"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext); // Tutup dialog
+              bool success = await ApiService.logout();
+
+              if (success) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => welcomePage()),
+                  (Route<dynamic> route) => false,
+                );
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Berhasil logout')),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Gagal logout')),
+                );
+              }
+            },
+            child: Text("Ya, Logout"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
   @override
   Widget build(BuildContext context) {
     final colorApp = Color.fromRGBO(214, 183, 255, 1.0);
@@ -44,11 +94,12 @@ class _profilePageState extends State<profilePage> {
             margin: EdgeInsets.only(right: 20),
             child: InkWell(
             onTap: () {
-              
+              confirmLogout(context);
             },
-            child: Image.asset(
-              'assets/Sliders.png',
-              ),
+            child: Icon(
+              Icons.logout,
+              size: 30,
+            )
           ),
           )
         ],
@@ -59,12 +110,35 @@ class _profilePageState extends State<profilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
+            FutureBuilder(
+            // Memanggil fungsi async untuk mengambil username
+            future: PreferencesService().getImgProfile(),
+            builder: (context, snapshot) {
+              // Jika statusnya waiting (masih memuat)
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Container(child: CircularProgressIndicator());
+              }
+
+              // Jika terjadi error
+              if (snapshot.hasError) {
+                return Container(child: Text('Error: ${snapshot.error}'));
+              }
+
+              // Jika data berhasil didapatkan
+              if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                return Container(
                 margin: EdgeInsets.only(top: 20),
-                child: Image.asset(
-                  'assets/profile2.png'
-                ),
-              ),
+                child: CachedNetworkImage(
+                  imageUrl: '${snapshot.data}',
+                  fit: BoxFit.fill,
+                  width: 150,
+                  height: 150,
+                )
+                );
+              }
+              return Container(child: Text('No user data available'));
+            },
+          ),
               Container(
                 margin: EdgeInsets.only(top: 15),
                 child: Column(
@@ -73,15 +147,36 @@ class _profilePageState extends State<profilePage> {
                       margin: EdgeInsets.only(bottom: 11),
                       child: Column(
                         children: [
-                          Container(
-                            child: Text(
-                              'Gladdyzzz_',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 18
-                              ),
-                            ),
+                          FutureBuilder(
+                            // Memanggil fungsi async untuk mengambil username
+                            future: PreferencesService().getUsername(),
+                            builder: (context, snapshot) {
+                            // Jika statusnya waiting (masih memuat)
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Container(child: CircularProgressIndicator());
+                            }
+
+                            // Jika terjadi error
+                            if (snapshot.hasError) {
+                              return Container(child: Text('Error: ${snapshot.error}'));
+                            }
+
+                            // Jika data berhasil didapatkan
+                            if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                              return Container(
+                                child: Text(
+                                '${snapshot.data}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 18
+                                ),
+                                ),
+                              );
+                            }
+                            return Container(child: Text('No user data available'));
+                            },
                           ),
+                          
                         ],
                       ),
                     ),

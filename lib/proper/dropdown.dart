@@ -10,7 +10,7 @@ class DropdownWidget extends StatefulWidget {
 }
 
 class _DropdownWidgetState extends State<DropdownWidget> {
-  List<String> options = ['Horor', 'Fantasy', 'Romance'];
+  List<String> options = ['Horor', 'Fantasy', 'Romance', 'Action', 'Action Komedi', 'Romance Komedi', 'Action Horor', 'Thriller Horor'];
 
   @override
   Widget build(BuildContext context) {

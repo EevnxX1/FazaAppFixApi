@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:faza_citra/proper/navbar_user.dart';
 import 'package:faza_citra/read.dart';
 import 'package:faza_citra/tambah_bab.dart';
@@ -47,7 +48,6 @@ class write2Page extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorApp = Color.fromRGBO(214, 183, 255, 1.0);
     final screenWidht = MediaQuery.of(context).size.width; //dari layar
     final screenHeight = MediaQuery.of(context).size.height; //dari layar
     return Scaffold(
@@ -66,7 +66,7 @@ class write2Page extends StatelessWidget {
         title: Text(
           this.judul_buku,
           style: TextStyle(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             fontSize: 20
           ),
         ),
@@ -83,31 +83,7 @@ class write2Page extends StatelessWidget {
                   padding: EdgeInsets.all(10),
                   height: 220,
                   width: 150,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage(
-                        'assets/wilB.png',
-                      )
-                    )
-                    ),
-                  child: Container(
-                    alignment: Alignment.topRight,
-                    child: InkWell(
-                    onTap: () {
-                      
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.grey.withOpacity(0.9)
-                      ),
-                      child: Icon(
-                        Icons.edit_outlined
-                      ),
-                    ),
-                  ),
-                  )
+                  child: CachedNetworkImage(imageUrl: this.cover_book, fit: BoxFit.fill,)
                 ),
                 Container(
                   margin: EdgeInsets.only(top: 20),
@@ -119,7 +95,7 @@ class write2Page extends StatelessWidget {
                         child: Text(
                         'Judul Cerita',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           fontSize: 16
                         ),
                       ),
@@ -130,11 +106,12 @@ class write2Page extends StatelessWidget {
                           color: Colors.black.withOpacity(0.09)
                         ),
                         child: TextField(
+                          readOnly: true,
                           controller: TextEditingController(
                             text: this.judul_buku
                           ),
                           style: TextStyle(
-                            fontWeight: FontWeight.w900
+                            fontWeight: FontWeight.w700
                           ),
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.only(top: 12, left: 20, bottom: 12),
@@ -163,7 +140,7 @@ class write2Page extends StatelessWidget {
                         child: Text(
                         'Sinopsis',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           fontSize: 16
                         ),
                       ),
@@ -174,13 +151,15 @@ class write2Page extends StatelessWidget {
                           color: Colors.black.withOpacity(0.09)
                         ),
                         child: TextField(
+                          readOnly: true,
                           maxLines: null,
                           controller: TextEditingController(
                             text: this.sinopsis,
                           ),
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.black.withOpacity(0.5)
+                            color: Colors.black.withOpacity(0.5),
+                            fontWeight: FontWeight.w500
                           ),
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.only(top: 15, left: 20, bottom: 15),
@@ -210,13 +189,15 @@ class write2Page extends StatelessWidget {
                           color: Colors.black.withOpacity(0.09)
                         ),
                         child: TextField(
+                          readOnly: true,
                           maxLines: null,
                           controller: TextEditingController(
                             text: this.genre,
                           ),
                           style: TextStyle(
                             color: Colors.black.withOpacity(0.5),
-                            fontSize: 14
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500
                           ),
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.only(top: 15, left: 20, bottom: 15),
@@ -250,24 +231,30 @@ class write2Page extends StatelessWidget {
                         child: Text(
                           'Bab Cerita',
                           style: TextStyle(
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             fontSize: 16
                           ),
                         ),
                       ),
                       Container(
                         width: screenWidht,
-                        height: screenHeight * 0.1,
-                        child: Expanded(
                         child: FutureBuilder<List<Map<String, dynamic>>>(
                           future: fetchBabList(),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState == ConnectionState.waiting) {
                               return Center(child: CircularProgressIndicator());
                             } else if (snapshot.hasError) {
-                              return Center(child: Text("Belum ada bab"));
+                              return Center(child: Text("Gagal Mengambil Bab Cerita", 
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500
+                              ),
+                              ));
                             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                              return Center(child: Text("Belum ada bab"));
+                              return Center(child: Text("Belum ada Bab Cerita", 
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500
+                              ),
+                              ));
                             }
 
                             List<Map<String, dynamic>> babList = snapshot.data!;
@@ -314,7 +301,6 @@ class write2Page extends StatelessWidget {
                 );
               },
             ),
-          ),
                       ),
                       Container(
                         margin: EdgeInsets.only(bottom: 10),
@@ -340,7 +326,7 @@ class write2Page extends StatelessWidget {
                               color: Colors.black.withOpacity(0.09)
                             ),
                             child: Text(
-                              'Tambah Bab +',
+                              'Tambah Bab Cerita +',
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold

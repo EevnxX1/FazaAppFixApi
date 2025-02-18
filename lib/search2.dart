@@ -1,8 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:faza_citra/detail.dart';
 import 'package:faza_citra/proper/navbar_user.dart';
 import 'package:flutter/material.dart';
 import './home.dart';
 import './search1.dart';
-import './write1.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class search2Page extends StatefulWidget {
   const search2Page({super.key});
@@ -12,6 +15,50 @@ class search2Page extends StatefulWidget {
 }
 
 class _search2PageState extends State<search2Page> {
+  final List<String> genres = ['Horor', 'Fantasy', 'Romance', 'Action', 'Action Komedi', 'Romance Komedi', 'Action Horor', 'Thriller Horor'];
+  Map<String, List> booksByGenre = {}; // Menyimpan buku berdasarkan genre
+
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAllGenres();
+  }
+
+
+  Future<void> fetchBooksByGenre(String genre) async {
+    final url = Uri.parse('http://127.0.0.1:8000/api/books/genre?genre=$genre');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      setState(() {
+        booksByGenre[genre] = jsonDecode(response.body);
+      });
+    } else {
+      print("Gagal mengambil data buku untuk genre $genre.");
+    }
+  }
+
+  void fetchAllGenres() {
+    for (String genre in genres) {
+      fetchBooksByGenre(genre);
+    }
+  } 
+
+
+  // Pindah ke halaman hasil pencarian
+  void navigateToSearchResults(String query) {
+    if (query.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => search1Page(searchQuery: query),
+        ),
+      );
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final colorApp = Color.fromRGBO(214, 183, 255, 1.0);
@@ -29,19 +76,10 @@ class _search2PageState extends State<search2Page> {
           ),
           width: screenWidht,
           child: TextField(
+            onSubmitted: navigateToSearchResults,
             decoration: InputDecoration(
-              suffixIcon: IconButton(
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return search1Page();
-                  }
-                ),
-                );
-                },
-                icon: Icon(
-                  Icons.search
-                ),
+              suffixIcon: Icon(
+                Icons.search
               ),
               border: InputBorder.none,
               contentPadding: EdgeInsets.only(left: 20, top: 13),
@@ -55,171 +93,11 @@ class _search2PageState extends State<search2Page> {
         child: Container(
           padding: EdgeInsets.only(top: 10, left: 20, right: 20),
           child: Column(
-            children: [
-              Container(
-                margin: EdgeInsets.only(bottom: 20),
-                child: Wrap(
-                  spacing: 2.0,
-                  runSpacing: 6.0,
-                  children: [
-                    Container(
-                      margin: EdgeInsets.only(right: 5),
-                      child: InkWell(
-                      onTap: () {
-                        
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: colorApp.withOpacity(0.5)
-                        ),
-                        child: Text(
-                          'Romance',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 13
-                          ),
-                        ),
-                      ),
-                    ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(right: 5),
-                      child: InkWell(
-                      onTap: () {
-                        
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: colorApp.withOpacity(0.5)
-                        ),
-                        child: Text(
-                          'Thriller',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 13
-                          ),
-                        ),
-                      ),
-                    ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(right: 5),
-                      child: InkWell(
-                      onTap: () {
-                        
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: colorApp.withOpacity(0.5)
-                        ),
-                        child: Text(
-                          'Action Komedi',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 13
-                          ),
-                        ),
-                      ),
-                    ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(right: 5),
-                      child: InkWell(
-                      onTap: () {
-                        
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: colorApp.withOpacity(0.5)
-                        ),
-                        child: Text(
-                          'Fan Action',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 13
-                          ),
-                        ),
-                      ),
-                    ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(right: 5),
-                      child: InkWell(
-                      onTap: () {
-                        
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: colorApp.withOpacity(0.5)
-                        ),
-                        child: Text(
-                          'Romance Komedi',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 13
-                          ),
-                        ),
-                      ),
-                    ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(right: 5),
-                      child: InkWell(
-                      onTap: () {
-                        
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: colorApp.withOpacity(0.5)
-                        ),
-                        child: Text(
-                          'Action Horor',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 13
-                          ),
-                        ),
-                      ),
-                    ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(right: 5),
-                      child: InkWell(
-                      onTap: () {
-                        
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: colorApp.withOpacity(0.5)
-                        ),
-                        child: Text(
-                          'Thriller Horor',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 13
-                          ),
-                        ),
-                      ),
-                    ),
-                    ),
-                  ],
-                )
-              ),
-              Container(
+            children: genres.map((genre) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
                 margin: EdgeInsets.only(bottom: 20),
                 child: Column(
                   children: [
@@ -229,10 +107,10 @@ class _search2PageState extends State<search2Page> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'New Arrival',
+                            genre.toUpperCase(),
                             style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
                               letterSpacing: 0.01
                             ),
                           ),
@@ -251,197 +129,47 @@ class _search2PageState extends State<search2Page> {
                       ),
                     ),
                     Container(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
+                      height: 200,
+                      child: booksByGenre[genre] == null 
+                      ? Center(child: CircularProgressIndicator()) // Loading Indicator
+                      :ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: booksByGenre[genre]!.length,
+                        itemBuilder: (context, index) {
+                          var book = booksByGenre[genre]![index];
+                          return  Container(
+                            margin: EdgeInsets.only(right: 15),
                             child: InkWell(
                               onTap: () {
-                                
-                              },
-                              child: Image.asset(
-                                'assets/blB.png',
-                                height: 165,
+                                Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) {
+                                  return detailPage(
+                                    id_buku: book['id'].toString(),
+                                    cover_buku: book['cover_book'],
+                                    judul_buku: book['title'],
+                                    nama_buat: book['username'],
+                                    sinopsis: book['sinopsis'],
+                                  );
+                                }
                               ),
-                            ),
-                          ),
-                          Container(
-                            child: InkWell(
-                              onTap: () {
-                                
+                              );
                               },
-                              child: Image.asset(
-                                'assets/noiseB.png',
-                                height: 165,
-                              ),
+                              child: CachedNetworkImage(
+                                imageUrl: book['cover_book'],
+                                width: 130,
+                                fit: BoxFit.fill,
+                              )
                             ),
-                          ),
-                          Container(
-                            child: InkWell(
-                              onTap: () {
-                                
-                              },
-                              child: Image.asset(
-                                'assets/ladrB.png',
-                                height: 165,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                          );
+                        }
+                      ) 
                     ),
                   ],
                 ),
               ),
-              Container(
-                margin: EdgeInsets.only(bottom: 20),
-                child: Column(
-                  children: [
-                    Container(
-                      margin: EdgeInsets.only(bottom: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Thriller',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 17,
-                              letterSpacing: 0.01
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              
-                            },
-                            child: Text(
-                              'Lihat selengkapnya',
-                              style: TextStyle(
-                                fontSize: 12
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    Container(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            child: InkWell(
-                              onTap: () {
-                                
-                              },
-                              child: Image.asset(
-                                'assets/nkbyB.png',
-                                height: 165,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            child: InkWell(
-                              onTap: () {
-                                
-                              },
-                              child: Image.asset(
-                                'assets/flagB.png',
-                                height: 165,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            child: InkWell(
-                              onTap: () {
-                                
-                              },
-                              child: Image.asset(
-                                'assets/ikzsB.png',
-                                height: 165,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.only(bottom: 20),
-                child: Column(
-                  children: [
-                    Container(
-                      margin: EdgeInsets.only(bottom: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'New Arrival',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 17,
-                              letterSpacing: 0.01
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              
-                            },
-                            child: Text(
-                              'Lihat selengkapnya',
-                              style: TextStyle(
-                                fontSize: 12
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    Container(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            child: InkWell(
-                              onTap: () {
-                                
-                              },
-                              child: Image.asset(
-                                'assets/rbB.png',
-                                height: 165,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            child: InkWell(
-                              onTap: () {
-                                
-                              },
-                              child: Image.asset(
-                                'assets/htealsB.png',
-                                height: 165,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            child: InkWell(
-                              onTap: () {
-                                
-                              },
-                              child: Image.asset(
-                                'assets/ttouB.png',
-                                height: 165,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+                ],
+              );
+            }).toList(),
           ),
         ),
       ),

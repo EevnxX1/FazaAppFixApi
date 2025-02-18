@@ -1,3 +1,4 @@
+import 'package:faza_citra/edit_bab.dart';
 import 'package:faza_citra/proper/dropdown.dart';
 import 'package:flutter/material.dart';
 import './home.dart';
@@ -10,6 +11,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 import 'dart:html' as html;
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class WriteEdit extends StatefulWidget {
@@ -40,7 +42,9 @@ class _WriteEditState extends State<WriteEdit> {
   late TextEditingController _sinopsisController;
   late ValueNotifier<String?> _selectedValueNotifier;
   Uint8List? _coverBytes;
+  // late String _coverHttp;
   bool _isLoading = false;
+  String? _coverOld;
 
 
   @override
@@ -50,27 +54,26 @@ class _WriteEditState extends State<WriteEdit> {
     _judulController = TextEditingController(text: widget.judul_buku);
     _sinopsisController = TextEditingController(text: widget.sinopsis);
     _selectedValueNotifier = ValueNotifier<String?>(widget.genre);
-    fetchImage();
     print(widget.cover_book);
     print(_coverBytes);
   }
 
   // fungsi untuk menetapkan gambar yang lama atau tidak ganti gambar
-  Future<void> fetchImage() async {
-    String imageUrl = widget.cover_book;
-    try { 
-      final response = await http.get(Uri.parse(imageUrl));
-      if (response.statusCode == 200) {
-        setState(() {
-          _coverBytes = response.bodyBytes;
-        });
-      } else {
-        print("Gagal mengambil gambar: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("Error: $e");
-    }
-  }
+  // Future<void> fetchImage() async {
+  //   String imageUrl = widget.cover_book;
+  //   try { 
+  //     final response = await http.get(Uri.parse(imageUrl));
+  //     if (response.statusCode == 200) {
+  //       setState(() {
+  //         _coverBytes = response.bodyBytes;
+  //       });
+  //     } else {
+  //       print("Gagal mengambil gambar: ${response.statusCode}");
+  //     }
+  //   } catch (e) {
+  //     print("Error: $e");
+  //   }
+  // }
 
   @override
   // pada saat mulai meninggalkan widget, fungsi ini akan aktif dan menghapus isi input
@@ -114,6 +117,10 @@ class _WriteEditState extends State<WriteEdit> {
     print(_selectedValueNotifier.value);
     print(_judulController.text);
     print(_sinopsisController.text);
+    
+    if(_coverBytes == null) {
+      _coverOld = widget.cover_book;
+    }
 
     // jika true maka dia akan mengupdate data dan mengoper halaman ke write1Page
     try {
@@ -124,6 +131,7 @@ class _WriteEditState extends State<WriteEdit> {
         _judulController.text,
         _sinopsisController.text,
         _coverBytes,
+        _coverOld
       );
 
       Navigator.pushReplacement(
@@ -150,6 +158,30 @@ class _WriteEditState extends State<WriteEdit> {
     }
   }
   
+
+  Future<List<Map<String, dynamic>>> fetchBabList() async {
+    final url = Uri.parse('http://127.0.0.1:8000/api/books/${widget.id_buku}/babs');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((bab) => {
+          'id': bab['id'],
+          'book_id': bab['book_id'],
+          'bab_number': bab['bab_number'],
+          'sub_title': bab['sub_title'],
+          'body': bab['body'],
+        }).toList();
+      } else {
+        throw Exception('Gagal mengambil data bab');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final colorApp = Color.fromRGBO(214, 183, 255, 1.0);
@@ -171,7 +203,7 @@ class _WriteEditState extends State<WriteEdit> {
         title: Text(
           'Edit Cerita',
           style: TextStyle(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             fontSize: 20
           ),
         ),
@@ -206,6 +238,9 @@ class _WriteEditState extends State<WriteEdit> {
                           ),
                           Text(
                             'Upload Cover Book',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500
+                            ),
                           )
                         ],
                       )
@@ -221,7 +256,7 @@ class _WriteEditState extends State<WriteEdit> {
                         child: Text(
                         'Judul Cerita',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           fontSize: 16
                         ),
                       ),
@@ -235,7 +270,7 @@ class _WriteEditState extends State<WriteEdit> {
                           controller: _judulController,
                           maxLines: null,
                           style: TextStyle(
-                            fontWeight: FontWeight.w900
+                            fontWeight: FontWeight.w700
                           ),
                           decoration: InputDecoration(
                             hintText: 'Tambahkan Judul Cerita',
@@ -260,7 +295,7 @@ class _WriteEditState extends State<WriteEdit> {
                         child: Text(
                         'Genre',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           fontSize: 16
                         ),
                       ),
@@ -295,7 +330,7 @@ class _WriteEditState extends State<WriteEdit> {
                         child: Text(
                         'Sinopsis',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           fontSize: 16
                         ),
                       ),
@@ -321,16 +356,8 @@ class _WriteEditState extends State<WriteEdit> {
                             )
                           ),
                         ),
-                      )
-                    ],
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(top: 20),
-                  color: Colors.black.withOpacity(0.09),
-                  height: 2,
-                ),
-                Container(
+                      ),
+                      Container(
                   margin: EdgeInsets.only(top: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -357,6 +384,102 @@ class _WriteEditState extends State<WriteEdit> {
                             ),
                           )
                         ),
+                      ),
+                    ],
+                  ),
+                )
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 20),
+                  color: Colors.black.withOpacity(0.09),
+                  height: 2,
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(bottom: 7),
+                        child: Text(
+                          'Edit Bab Cerita',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: screenWidht,
+                        child: FutureBuilder<List<Map<String, dynamic>>>(
+                          future: fetchBabList(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Center(child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Center(child: Text("Gagal Mengambil Bab Cerita", 
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500
+                              ),
+                              ));
+                            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                              return Center(child: Text("Belum ada Bab Cerita", 
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500
+                              ),
+                              ));
+                            }
+
+                            List<Map<String, dynamic>> babList = snapshot.data!;
+
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: babList.length,
+                              itemBuilder: (context, index) {
+                              final bab = babList[index];
+                              return Container(
+                        margin: EdgeInsets.only(bottom: 10),
+                        child: InkWell(
+                          onTap: () {
+                            // Navigasi ke detail buku dengan mengirimkan ID buku
+                            Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditBabPage(
+                                id_bab: bab['id'].toString(),
+                                id_buku: bab['book_id'].toString(),
+                                judul_buku: widget.judul_buku,
+                                bab_number: bab['bab_number'].toString(),
+                                sub_judul: bab['sub_title'],
+                                isi_cerita: bab['body'],
+                                cover_buku: widget.cover_book,
+                              ),
+                            ),
+                            );
+                          },
+                          child: Container(
+                            width: screenWidht,
+                            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 14),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Colors.black.withOpacity(0.09)
+                            ),
+                            child: Text(
+                              'Bab ${bab['bab_number']} : ${bab['sub_title']}',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500
+                              ),
+                            ),
+                          )
+                        ),
+                      );
+                  },
+                );
+              },
+            ),
                       ),
                     ],
                   ),

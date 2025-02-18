@@ -4,31 +4,55 @@ import 'package:faza_citra/services/api_service.dart';
 import 'package:faza_citra/write1.dart';
 import 'package:flutter/material.dart';
 
-class tambahBabPage extends StatefulWidget {
-  const tambahBabPage({
+class EditBabPage extends StatefulWidget {
+  const EditBabPage({
     super.key,
     required this.id_buku,
+    required this.id_bab,
     required this.judul_buku,
+    required this.bab_number,
+    required this.sub_judul,
+    required this.isi_cerita,
     required this.cover_buku,
   });
 
   final id_buku;
-  final judul_buku;
+  final id_bab; 
+  final judul_buku; 
+  final bab_number;
+  final sub_judul;
+  final isi_cerita;
   final cover_buku;
 
   @override
-  State<tambahBabPage> createState() => _tambahBabPageState();
+  State<EditBabPage> createState() => _EditBabPageState();
 }
 
-class _tambahBabPageState extends State<tambahBabPage> {
-  final TextEditingController _babNumberController = TextEditingController();
-  final TextEditingController _subJudulController = TextEditingController();
-  final TextEditingController _isiCeritaController = TextEditingController();
-
+class _EditBabPageState extends State<EditBabPage> {
+  late TextEditingController _babNumberController;
+  late TextEditingController _subJudulController;
+  late TextEditingController _isiCeritaController;
   bool _isLoading = false;
 
+
+  @override
+  // Pada saat mulai menampilkan halaman, hal pertama yang dilakukan adalah memasukkan value input dari database.
+  void initState() {
+    super.initState();
+    _babNumberController = TextEditingController(text: widget.bab_number);
+    _subJudulController = TextEditingController(text: widget.sub_judul);
+    _isiCeritaController = TextEditingController(text: widget.isi_cerita);
+    print('isi = ' + widget.bab_number);
+    print('isi = ' + widget.id_bab);
+    print('isi = ' + widget.id_buku);
+    print('isi = ' + widget.isi_cerita);
+    print('isi = ' + widget.judul_buku);
+    print('isi = ' + widget.sub_judul);
+  }
+
+
   // masuk Ke Fungsi Register
-  void _babBaru() async {
+  void _updateBab() async {
     // setState(): Digunakan untuk memperbarui state widget, seperti mengganti nilai
     setState(() {
       _isLoading = true;
@@ -39,11 +63,12 @@ class _tambahBabPageState extends State<tambahBabPage> {
     try {
       // ApiService().register(): Memanggil fungsi register dari api_service.dart.
       final apiService = ApiService(); //dari class di halaman api_service
-      final result = await apiService.buatBab(
+      final result = await apiService.updateBab(
         _babNumberController.text, 
         _subJudulController.text, 
         _isiCeritaController.text, 
-        widget.id_buku.toString()
+        widget.id_buku,
+        widget.id_bab
         );
       
       // Handle successful Register (e.g., navigate to home screen)
@@ -91,7 +116,8 @@ class _tambahBabPageState extends State<tambahBabPage> {
           ),
         ),
         title: Text(
-          '${widget.judul_buku}',
+          widget.judul_buku,
+          // 'judul buku',
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 20
@@ -110,7 +136,10 @@ class _tambahBabPageState extends State<tambahBabPage> {
                   padding: EdgeInsets.all(10),
                   height: 220,
                   width: 150,
-                  child: CachedNetworkImage(imageUrl: widget.cover_buku, fit: BoxFit.fill,)
+                  child: CachedNetworkImage(
+                    imageUrl: widget.cover_buku,
+                     fit: BoxFit.fill,
+                  )
                 ),
                 Container(
                   margin: EdgeInsets.only(top: 20),
@@ -254,7 +283,7 @@ class _tambahBabPageState extends State<tambahBabPage> {
                       Container(
                         margin: EdgeInsets.only(bottom: 10),
                         child: InkWell(
-                          onTap: _babBaru,
+                          onTap: _updateBab,
                           child: Container(
                             width: screenWidht,
                             padding: EdgeInsets.symmetric(horizontal: 25, vertical: 14),
@@ -263,7 +292,7 @@ class _tambahBabPageState extends State<tambahBabPage> {
                               color: Colors.black.withOpacity(0.09)
                             ),
                             child: Text(
-                              _isLoading ? 'Prosess..':'Tambah Bab',
+                              _isLoading ? 'Prosess..':'Edit Bab',
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold

@@ -1,6 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:faza_citra/detail.dart';
 import 'package:faza_citra/proper/appbar_user.dart';
-import 'package:faza_citra/proper/content_home.dart';
 import 'package:faza_citra/proper/navbar_user.dart';
+import 'package:faza_citra/services/api_service.dart';
 import 'package:flutter/material.dart';
 import './profile.dart';
 import 'services/preference_service.dart';
@@ -12,6 +14,21 @@ class homePage extends StatefulWidget {
 }
 
 class _homePageState extends State<homePage> {
+  List<dynamic> books = []; // List untuk menyimpan data buku
+
+  @override
+  void initState() {
+    super.initState();
+    loadBooks();
+  }
+
+  Future<void> loadBooks() async {
+    List<dynamic> data = await ApiService.fetchBooks();
+    setState(() {
+      books = data;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorApp = Color.fromRGBO(214, 183, 255, 1.0);
@@ -31,7 +48,7 @@ class _homePageState extends State<homePage> {
                   Container(
                     margin: EdgeInsets.only(left: 27, bottom: 20, top: 25),
                     child: Text(
-                      'My Books',
+                      'List Books',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 20
@@ -41,17 +58,81 @@ class _homePageState extends State<homePage> {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 12),
                     height: 290,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        myBooks(
-                          content: 'konten', 
-                          gambar: 'assets/wavesB.png', 
-                          judul: 'Waves', 
-                          penulis: 'Ingrid Chardbert'
-                        )
-                      ],
-                    )
+                    child: books.isEmpty
+                      ? Center(child: CircularProgressIndicator()) // Loading indikator
+                      : ListView.builder(
+                      scrollDirection: Axis.horizontal, // ListView horizontal
+                      itemCount: books.length,
+                      itemBuilder: (context, index) {
+                        var book = books[index];
+                        return Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) {
+                                  return detailPage(
+                                    id_buku: book['id'].toString(),
+                                    cover_buku: book['cover_book'],
+                                    judul_buku: book['title'],
+                                    nama_buat: book['username'],
+                                    sinopsis: book['sinopsis'],
+                                  );
+                                }
+                              ),
+                              );
+                            },
+                            child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Image.asset(
+                              //   'assets/wavesB.png',
+                              //   scale: 0.8,
+                              // ),
+                              Container(
+                                height: 210,
+                                width: 150,
+                                child: CachedNetworkImage(
+                                imageUrl: book['cover_book'],
+                                fit: BoxFit.fill,
+                              ),
+                              ),
+                              Container(
+                                width: 150,
+                                margin: EdgeInsets.only(top: 8),
+                                height: 50,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      child: Text(
+                                        book['title'],
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 19,
+                                          fontWeight: FontWeight.w700
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      child: Text(
+                                        book['username'],
+                                        style: TextStyle(
+                                          color: Colors.black38
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                          )
+                        );
+                      },
+                    ),
                   )
                 ],
               ),
@@ -177,20 +258,48 @@ class _homePageState extends State<homePage> {
                   ),
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 12),
-                    height: 300,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 15),
-                          child: Column(
+                    height: 290,
+                    child: books.isEmpty
+                      ? Center(child: CircularProgressIndicator()) // Loading indikator
+                      : ListView.builder(
+                      scrollDirection: Axis.horizontal, // ListView horizontal
+                      itemCount: books.length,
+                      itemBuilder: (context, index) {
+                        var book = books[index];
+                        return Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) {
+                                  return detailPage(
+                                    id_buku: book['id'].toString(),
+                                    cover_buku: book['cover_book'],
+                                    judul_buku: book['title'],
+                                    nama_buat: book['username'],
+                                    sinopsis: book['sinopsis'],
+                                  );
+                                }
+                              ),
+                              );
+                            },
+                            child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Image.asset(
-                                'assets/iwtsmfB.png',
-                                scale: 0.8,
+                              // Image.asset(
+                              //   'assets/wavesB.png',
+                              //   scale: 0.8,
+                              // ),
+                              Container(
+                                height: 210,
+                                width: 150,
+                                child: CachedNetworkImage(
+                                imageUrl: book['cover_book'],
+                                fit: BoxFit.fill,
+                              ),
                               ),
                               Container(
+                                width: 150,
                                 margin: EdgeInsets.only(top: 8),
                                 height: 50,
                                 child: Column(
@@ -199,7 +308,9 @@ class _homePageState extends State<homePage> {
                                   children: [
                                     Container(
                                       child: Text(
-                                        'I Went To See..',
+                                        book['title'],
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           fontSize: 19,
                                           fontWeight: FontWeight.w700
@@ -208,7 +319,7 @@ class _homePageState extends State<homePage> {
                                     ),
                                     Container(
                                       child: Text(
-                                        'Ingrid Chardbert',
+                                        book['username'],
                                         style: TextStyle(
                                           color: Colors.black38
                                         ),
@@ -219,87 +330,10 @@ class _homePageState extends State<homePage> {
                               )
                             ],
                           ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 15),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Image.asset(
-                                'assets/siktcB.png',
-                                scale: 0.8,
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 8),
-                                height: 50,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      child: Text(
-                                        'Something Is..',
-                                        style: TextStyle(
-                                          fontSize: 19,
-                                          fontWeight: FontWeight.w700
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      child: Text(
-                                        'Ingrid Chardbert',
-                                        style: TextStyle(
-                                          color: Colors.black38
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 15),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Image.asset(
-                                'assets/catboyB.png',
-                                scale: 0.8,
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 8),
-                                height: 50,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      child: Text(
-                                        'Catboy ',
-                                        style: TextStyle(
-                                          fontSize: 19,
-                                          fontWeight: FontWeight.w700
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      child: Text(
-                                        'Ingrid Chardbert',
-                                        style: TextStyle(
-                                          color: Colors.black38
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
-                    )
+                          )
+                        );
+                      },
+                    ),
                   )
                 ],
               ),
